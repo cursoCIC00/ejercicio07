@@ -32,87 +32,36 @@ import com.vaadin.ui.VerticalLayout;
 @Theme("mytheme")
 public class MyUI extends UI {
 
+	private PersonaForm personaForm = new PersonaForm(this);
+	
+	
     @Override
     protected void init(VaadinRequest vaadinRequest) {
-        final VerticalLayout layout = new VerticalLayout();
-        
-        final TextField tfNombre = new TextField();
-        tfNombre.setCaption("Nombre:");
-        
-        final TextField tfApellido = new TextField();
-        tfApellido.setCaption("Apellido:");
-        
-        DateTimeField tfFecha = new DateTimeField();
-        tfFecha.setCaption("Fecha:");
 
-        Collection<Pais> listaPaises = getListaPaises();
-        
-        ComboBox<Pais> cPais = new ComboBox<>("Select your country", listaPaises);
-        
-        Button button = new Button("Aceptar");
-        button.addClickListener( e -> {
-        	Persona persona = new Persona();
-        	persona.setNombre(tfNombre.getValue());
-        	persona.setApellidos(tfApellido.getValue());
-        	persona.setFecha(tfFecha.getValue());
-        	persona.setPais(cPais.getValue());
+        VerticalLayout layout = new VerticalLayout();
+        Button button3 = new Button("Cambiar persona");
+        button3.addClickListener( e -> {
+        	Persona persona = leerDesdeBBDD();
         	
-        	
-        	Notification.show(calcularMensaje(persona), Type.TRAY_NOTIFICATION);
+        	personaForm.setPersona(persona);
+        	PersonaForm auxpersonaForm = new PersonaForm(this);
+        	layout.addComponent(auxpersonaForm);
         });
         
-        Button button2 = new Button("Cambia");
-        button2.addClickListener( e -> {
-        	button.setVisible(!button.isVisible());
-//        	if (button.isVisible()) {
-//        		button.setVisible(false);
-//        	} else {
-//        		button.setVisible(true);
-//        	}
-        	
-        });
-        
-        cPais.setPlaceholder("No has seleccionado país");
-        
-        cPais.setItemCaptionGenerator(Pais::getNombreCompleto);
-
-        cPais.setEmptySelectionAllowed(false);
-
-
-        layout.addComponents(tfNombre, tfApellido, tfFecha, cPais, button, button2);
+        layout.addComponents(button3, personaForm);
         
         setContent(layout);
     }
 
-    private Collection<Pais> getListaPaises() {
-    	List<Pais> listaPaises = new ArrayList<>();
-    	
-    	Pais pais1 = new Pais();
-    	pais1.setNombreCompleto("España");
-    	
-    	listaPaises.add(pais1);
-    	
-    	pais1 = new Pais();
-    	pais1.setNombreCompleto("Francia");
-    	
-    	listaPaises.add(pais1);
-    	
-    	return listaPaises;
-    }
-    
-	private String calcularMensaje(Persona persona) {
-		LocalDateTime fecha = persona.getFecha();
-		
-		String sFecha ="fecha no establecida";
-		if (fecha != null) {
-			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd MM yyyy");
-			sFecha= fecha.format(dtf);
-		}
-		
-		String mensaje = String.format("Hola %s %s, estamos a %s en %s",
-				persona.getNombre(), persona.getApellidos(), sFecha, persona.getPais());
-		
-		return mensaje;
+	private Persona leerDesdeBBDD() {
+		Persona persona = new Persona();
+		persona.setNombre("Alberto");
+		persona.setApellidos("Dopico");
+		persona.setFecha(LocalDateTime.now());
+		Pais pais = new Pais();
+		pais.setNombreCompleto("España");
+		persona.setPais(pais);
+		return persona;
 	}
 
     @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)
